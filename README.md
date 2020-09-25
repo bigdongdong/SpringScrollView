@@ -1,4 +1,4 @@
-# SpringScrollLinearLayout
+# SpringScrollView
 继承自linearlayout实现的阻尼滚动ScrollView <br>
 
 
@@ -13,19 +13,6 @@
   }
   
   dependencies {
-	  implementation 'com.github.bigdongdong:SpringScrollLinearLayout:7.0' //添加依赖
+	  implementation 'com.github.bigdongdong:SpringScrollView:1.0' //添加依赖
   }
-```
-
-# 嵌套RecyclerView
-
-```xml
-<RelativeLayout
-    android:descendantFocusability="blocksDescendants"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <android.support.v7.widget.RecyclerView
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"/>
-</RelativeLayout>
 ```
