@@ -1,0 +1,3 @@
+include ':app:springscrolllinearlayout'
+include ':app'
+rootProject.name = "SpringScrollLinearLayout"
