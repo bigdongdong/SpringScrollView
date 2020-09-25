@@ -29,6 +29,10 @@ import android.widget.OverScroller;
  * 在onMeasure中对child重新measure
  * 且更改mode为MeasureSpec.UNSPECIFIED即可
  * 2.解决横向滑动出发child点击事件的bug
+ *
+ * 2020/9/25
+ * 1.解决child裁剪问题
+ * 2.重构项目extens FrameLayout 以解决裸露子View不显示bug
  */
 
 @SuppressLint("LongLogTag")
@@ -51,7 +55,6 @@ public class SpringScrollView extends FrameLayout {
     public SpringScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         VELOCITY_SYSTEM_MAX = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
-//        this.setOrientation(LinearLayout.VERTICAL);
         scroller = new OverScroller(context);
 
     }
