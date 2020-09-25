@@ -1,5 +1,5 @@
 # SpringScrollView
-继承自linearlayout实现的阻尼滚动ScrollView <br>
+阻尼滚动ScrollView <br>
 
 
 # 项目配置
