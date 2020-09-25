@@ -13,6 +13,6 @@
   }
   
   dependencies {
-	  implementation 'com.github.bigdongdong:SpringScrollView:1.1' //添加依赖
+	  implementation 'com.github.bigdongdong:SpringScrollView:1.5' //添加依赖
   }
 ```
