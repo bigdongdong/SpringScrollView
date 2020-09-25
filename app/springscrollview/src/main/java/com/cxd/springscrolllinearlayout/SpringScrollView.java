@@ -31,8 +31,9 @@ import android.widget.OverScroller;
  * 2.解决横向滑动出发child点击事件的bug
  *
  * 2020/9/25
- * 1.解决child裁剪问题
- * 2.重构项目extens FrameLayout 以解决裸露子View不显示bug
+ * 1.解决child match_parent布局超出屏幕问题
+ * 2.重构项目extends FrameLayout
+ * 并解决裸露子View不显示bug
  */
 
 @SuppressLint("LongLogTag")
