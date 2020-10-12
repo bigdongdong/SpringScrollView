@@ -8,7 +8,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.OverScroller;
 
 /**
@@ -34,16 +33,22 @@ import android.widget.OverScroller;
  * 1.解决child match_parent布局超出屏幕问题
  * 2.重构项目extends FrameLayout
  * 并解决裸露子View不显示bug
+ *
+ * 2020/10/12
+ * 优化了过度滑动回弹停顿的现象
  */
 
 @SuppressLint("LongLogTag")
 public class SpringScrollView extends FrameLayout {
     private final String TAG = "SpringScrollLinearLayout";
-    private final int MIN_FINGER_MOVE_DISTANCE_PX = 100; //最小手指移动距离 px
+    private final int MIN_FINGER_MOVE_DISTANCE_PX = 150; //最小手指移动距离 px
     private final int MIN_FINGER_CLICK_TIME_MS = 200 ; //手指点击最短时间 ms
-    private final int SPRING_DEFAULT_DISTANCE_PX = 300; //默认阻尼px
-    private final int SPRING_MAX_DISTANCE_PX = 500; //最大阻尼px
+
+    private final int SPRING_MAX_DISTANCE_PX = 700; //最大阻尼px
     private final int SPRING_DEFAULT_TIME_MS = 500; //默认阻尼时间ms
+
+    private final int OVER_SPRING_DEFAULT_DISTANCE_PX = 350; //默认过度阻尼px
+    private final int OVER_SPRING_DEFAULT_TIME_MS = 800; //默认过度阻尼时间ms
     private final int VELOCITY_SYSTEM_MAX; //系统内置的最大速度
 
     private OverScroller scroller ;
@@ -101,17 +106,6 @@ public class SpringScrollView extends FrameLayout {
         mMaxOverScrollY = totalContentHeight > h ? totalContentHeight - h : 0 ;
     }
 
-//    /**
-//     * 获取本view 在屏幕上的高度
-//     * @return
-//     */
-//    private int getThisViewHeightOnScreen(){
-//        Rect rect = new Rect();
-//        getWindowVisibleDisplayFrame(rect);
-//        return rect.bottom - rect.top;
-//    }
-
-//    private float mCurrMaxMoveYDistance; //当前最大移动(Y轴)位移
     private long mEventDownTime ; //event down 时的时间戳
     private float mEventDownX ; //event down 时的手指 x 坐标
     private float mEventDownY ; //event down 时的手指 y 坐标
@@ -201,7 +195,7 @@ public class SpringScrollView extends FrameLayout {
                     velocityTracker.computeCurrentVelocity(1000); //得到的速度是 ?px/s
                     final int currVelocityY = Math.min(VELOCITY_SYSTEM_MAX,(int)velocityTracker.getYVelocity());
                     scroller.fling(0,mCurrScrollY,0,-currVelocityY,
-                            0,0,-SPRING_DEFAULT_DISTANCE_PX, mMaxOverScrollY + SPRING_DEFAULT_DISTANCE_PX);
+                            0,0,-OVER_SPRING_DEFAULT_DISTANCE_PX, mMaxOverScrollY + OVER_SPRING_DEFAULT_DISTANCE_PX);
                     velocityTracker.clear();
                 }
                 postInvalidate();
@@ -219,23 +213,51 @@ public class SpringScrollView extends FrameLayout {
         //如果还在计算，说明还在滚动
         mIsScrolling = scroller.computeScrollOffset() ;
 
+        //越界阻尼
+        final int mCurrScrollY = getScrollY();
+        if(mIsFingerUp && (mCurrScrollY == -OVER_SPRING_DEFAULT_DISTANCE_PX
+                ||mCurrScrollY == mMaxOverScrollY + OVER_SPRING_DEFAULT_DISTANCE_PX)){
+            if(scroller.computeScrollOffset()){
+                scroller.forceFinished(true);
+            }
+            if (mCurrScrollY < 0) {
+                //顶部脱离
+                scroller.startScroll(0,mCurrScrollY-1,0,-mCurrScrollY, OVER_SPRING_DEFAULT_TIME_MS);
+            }else if(mCurrScrollY > mMaxOverScrollY){
+                //底部脱离
+                scroller.startScroll(0,mCurrScrollY+1,0,-(mCurrScrollY - mMaxOverScrollY), OVER_SPRING_DEFAULT_TIME_MS);
+            }
+            invalidate();
+        }
+
         //动画未结束 ， 计算还在进行中
-        if(scroller.computeScrollOffset()){
+        if(mIsScrolling){
             // view 滚动到对应位置
             this.scrollTo(scroller.getCurrX(),scroller.getCurrY());
             // 出发draw
             postInvalidate();
-        }else if(mIsFingerUp){
-            //滑动完毕，阻尼恢复
-            final int mCurrScrollY = getScrollY();
-            if (mCurrScrollY < 0) {
-                //顶部脱离
-                scroller.startScroll(0,mCurrScrollY,0,-mCurrScrollY, SPRING_DEFAULT_TIME_MS);
-            }else if(mCurrScrollY > mMaxOverScrollY){
-                //底部脱离
-                scroller.startScroll(0,mCurrScrollY,0,-(mCurrScrollY - mMaxOverScrollY), SPRING_DEFAULT_TIME_MS);
-            }
-            invalidate();
         }
     }
+//
+//    /**
+//     * 根据手指move的y来换算阻尼的px
+//     * 默认递进采集效率为-30%
+//     * @param moveY
+//     * @return
+//     */
+//    private int convertOffsetYbyMoveY(int moveY){
+//        return (int) (moveY * 0.7f);
+////        int y = Math.abs(moveY);
+////        if(y < 100){
+////            return y ;
+////        }
+////        int offsetY = 0 ;
+////        final int levels = y / 100 ;
+////        for (int i = 0; i < levels; i++) {
+////            offsetY += 100 * Math.pow(0.9f,i) ;
+////        }
+////        offsetY += (y%100) * Math.pow(0.9f,levels + 1) ;
+////
+////        return offsetY * (moveY > 0 ? 1: -1) ;
+//    }
 }
