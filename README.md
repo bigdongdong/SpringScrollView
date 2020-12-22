@@ -13,6 +13,6 @@
   }
   
   dependencies {
-	  implementation 'com.github.bigdongdong:SpringScrollView:${lastest_version}' //添加依赖
+	  implementation 'com.github.bigdongdong:SpringScrollView:latest.release' //添加依赖
   }
 ```
